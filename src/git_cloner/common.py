@@ -21,4 +21,3 @@ def connect_with_auth(site, port=443, path='/', login='', password=''):
     data = res.read()
 
     return data
-

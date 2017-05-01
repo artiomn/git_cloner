@@ -6,6 +6,14 @@ from pprint import pprint
 from .common import connect_with_auth
 
 
+class GithubClonerException(Exception):
+    def __init__(self, exc_data):
+        self.message = exc_data.get('message', '')
+
+    def __str__(self):
+        return self.message
+
+
 class GithubCloner(object):
     def __init__(self, site, owner, login='', password=''):
         self.login = login
@@ -34,10 +42,14 @@ class GithubCloner(object):
             git.Git().clone(clone_url, result_path)
 
     def _clone_github_projects(self):
-        repos = connect_with_auth('api.{}'.format(self.site), path='/users/{}/repos'.format(self.owner)).\
+        repos = connect_with_auth('api.{}'.format(self.site), path='/users/{}/repos'.format(self.owner),
+                                  login=self.login, password=self.password).\
             decode('utf-8')
 
         repos = json.loads(repos)
+
+        if not  isinstance(repos, list):
+            raise GithubClonerException(repos)
 
         with open('repos.json', 'w') as f:
             pprint(repos, stream=f)
