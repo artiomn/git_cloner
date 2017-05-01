@@ -67,7 +67,8 @@ class BitbucketCloner(object):
             self._clone_repo(project_key, repo)
 
     def _clone_projects(self):
-        projects = connect_with_auth(self.site, path='/rest/api/1.0/projects?limit=10000',
+        p = '/rest/api/1.0/projects' if not self.owner else '/rest/api/1.0/{}/projects'.format(self.owner)
+        projects = connect_with_auth(self.site, path='{}?limit=10000'.format(p),
                                      login=self.login,
                                      password=self.password).decode('utf-8')
 
