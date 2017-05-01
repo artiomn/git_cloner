@@ -17,6 +17,12 @@ class BitbucketCloner(object):
         self.site = site
         self.owner = owner
 
+    def _download_path(self, path):
+        return connect_with_auth(self.site,
+                                 path=path,
+                                 login=self.login,
+                                 password=self.password).decode('utf-8')
+
     def _clone_repo(self, project_key, repo):
         repo_name = repo['name']
         result_path = '{}/{}'.format(project_key, repo_name)
@@ -58,19 +64,14 @@ class BitbucketCloner(object):
         with open('{}/descr.json'.format(project_key), 'w') as f:
             pprint(str(project), stream=f)
 
-        repos = json.loads(connect_with_auth(self.site,
-                                             path='/rest/api/1.0/projects/{}/repos?limit=10000'.format(project_key),
-                                             login=self.login,
-                                             password=self.password).decode('utf-8'))
+        repos = json.loads(self._download_path('/rest/api/1.0/projects/{}/repos?limit=10000'.format(project_key)))
 
         for repo in repos.get('values', []):
             self._clone_repo(project_key, repo)
 
     def _clone_projects(self):
         p = '/rest/api/1.0/projects' if not self.owner else '/rest/api/1.0/{}/projects'.format(self.owner)
-        projects = connect_with_auth(self.site, path='{}?limit=10000'.format(p),
-                                     login=self.login,
-                                     password=self.password).decode('utf-8')
+        projects = self._download_path(path='{}?limit=10000'.format(p))
 
         with open('projects.json', 'w') as f:
             pprint(projects, stream=f)
