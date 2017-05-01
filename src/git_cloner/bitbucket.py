@@ -3,14 +3,17 @@ import os
 import json
 from pprint import pprint
 
+from .common import connect_with_auth
+
 
 class BitbucketCloner(object):
-    def __init__(self, site, login, password):
+    def __init__(self, site, owner, login, password):
         self.login = login
         self.password = password
         self.site = site
+        self.owner = owner
 
-    def clone_bitbucket_repo(self, project_key, repo):
+    def _clone_bitbucket_repo(self, project_key, repo):
         repo_name = repo['name']
         result_path = '{}/{}'.format(project_key, repo_name)
 
@@ -40,7 +43,7 @@ class BitbucketCloner(object):
             print('Cloning "{}"...'.format(result_path))
             git.Git().clone(clone_link, result_path)
 
-    def clone_bitbucket_repos(self, project):
+    def _clone_bitbucket_repos(self, project):
         project_key = project['key']
 
         try:
@@ -51,19 +54,27 @@ class BitbucketCloner(object):
         with open('{}/descr.json'.format(project_key), 'w') as f:
             f.write(str(project))
 
-        repos = json.loads(connect_with_auth(path='/rest/api/1.0/projects/{}/repos?limit=10000'.format(project_key)).decode('utf-8'))
+        repos = json.loads(connect_with_auth(self.site,
+                                             path='/rest/api/1.0/projects/{}/repos?limit=10000'.format(project_key),
+                                             login=self.login,
+                                             password=self.password).decode('utf-8'))
 
         for repo in repos.get('values', []):
-            self.clone_bitbucket_repo(project_key, repo)
+            self._clone_bitbucket_repo(project_key, repo)
 
-    def clone_bitbucket_projects(self):
-        projects = connect_with_auth(path='/rest/api/1.0/projects?limit=10000').decode('utf-8')
+    def _clone_bitbucket_projects(self):
+        projects = connect_with_auth(self.site, path='/rest/api/1.0/projects?limit=10000',
+                                     login=self.login,
+                                     password=self.password).decode('utf-8')
 
         with open('projects.json', 'w') as f:
-            f.write(projects)
+            pprint(projects, stream=f)
 
         projects = json.loads(projects)
 
         for project in projects.get('values', []):
-            self.clone_bitbucket_repos(project)
+            self._clone_bitbucket_repos(project)
 
+
+    def clone(self):
+        return self._clone_bitbucket_projects()

@@ -4,10 +4,11 @@
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser('Git web cloner')
-    parser.add_argument('--type', type=str, nargs=1, help='service type: `bitbucket` or `github`')
-    parser.add_argument('--login', type=str, nargs=1, default=[''], help='user login')
-    parser.add_argument('--password', type=str, nargs=1, default=[''], help='user password')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--type', '-t', type=str, nargs=1, help='service type: `bitbucket` or `github`')
+    parser.add_argument('--login', '-l', type=str, nargs=1, default=[''], help='user login')
+    parser.add_argument('--password', '-p', type=str, nargs=1, default=[''], help='user password')
+    parser.add_argument('--owner', '-o', type=str, nargs=1, default=[''], help='projects owner')
 
     parser.add_argument('site', metavar='site', type=str, help='service address')
 
@@ -30,8 +31,8 @@ if __name__ == '__main__':
         from git_cloner.bitbucket import BitbucketCloner
     elif service_type == 'github':
         from git_cloner.github import GithubCloner
-        owner = ''
-        GithubCloner(site, owner, login=login, password=password).clone()
+        owner = args.owner[0]
+        GithubCloner(site, owner=owner, login=login, password=password).clone()
     else:
         print('Unknown type "{}"!'.format(service_type))
         exit(1)
