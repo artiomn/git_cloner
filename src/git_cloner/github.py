@@ -21,14 +21,14 @@ class GithubCloner(object):
         self.site = site
         self.owner = owner
 
-    def _clone_github_repo(self, repo):
+    def _clone_repo(self, repo):
         repo_name = repo['name']
         result_path = repo_name
 
         try:
             clone_url = repo['clone_url']
         except KeyError:
-            print('"{}" was not cloned!'.format(result_path))
+            print('"{}" was not cloned, because has not clone url!'.format(result_path))
             return
 
         if os.path.isdir(result_path):
@@ -41,7 +41,7 @@ class GithubCloner(object):
             print('Cloning "{}"...'.format(result_path))
             git.Git().clone(clone_url, result_path)
 
-    def _clone_github_projects(self):
+    def _clone_projects(self):
         repos = connect_with_auth('api.{}'.format(self.site), path='/users/{}/repos'.format(self.owner),
                                   login=self.login, password=self.password).\
             decode('utf-8')
@@ -55,7 +55,7 @@ class GithubCloner(object):
             pprint(repos, stream=f)
 
         for repo in repos:
-            self._clone_github_repo(repo)
+            self._clone_repo(repo)
 
     def clone(self):
-        return self._clone_github_projects()
+        return self._clone_projects()

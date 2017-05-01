@@ -6,6 +6,10 @@ from pprint import pprint
 from .common import connect_with_auth
 
 
+class BitbucketclonerException(Exception):
+    pass
+
+
 class BitbucketCloner(object):
     def __init__(self, site, owner, login, password):
         self.login = login
@@ -13,7 +17,7 @@ class BitbucketCloner(object):
         self.site = site
         self.owner = owner
 
-    def _clone_bitbucket_repo(self, project_key, repo):
+    def _clone_repo(self, project_key, repo):
         repo_name = repo['name']
         result_path = '{}/{}'.format(project_key, repo_name)
 
@@ -43,7 +47,7 @@ class BitbucketCloner(object):
             print('Cloning "{}"...'.format(result_path))
             git.Git().clone(clone_link, result_path)
 
-    def _clone_bitbucket_repos(self, project):
+    def _clone_repos(self, project):
         project_key = project['key']
 
         try:
@@ -52,7 +56,7 @@ class BitbucketCloner(object):
             pass
 
         with open('{}/descr.json'.format(project_key), 'w') as f:
-            f.write(str(project))
+            pprint(str(project), stream=f)
 
         repos = json.loads(connect_with_auth(self.site,
                                              path='/rest/api/1.0/projects/{}/repos?limit=10000'.format(project_key),
@@ -60,9 +64,9 @@ class BitbucketCloner(object):
                                              password=self.password).decode('utf-8'))
 
         for repo in repos.get('values', []):
-            self._clone_bitbucket_repo(project_key, repo)
+            self._clone_repo(project_key, repo)
 
-    def _clone_bitbucket_projects(self):
+    def _clone_projects(self):
         projects = connect_with_auth(self.site, path='/rest/api/1.0/projects?limit=10000',
                                      login=self.login,
                                      password=self.password).decode('utf-8')
@@ -73,8 +77,8 @@ class BitbucketCloner(object):
         projects = json.loads(projects)
 
         for project in projects.get('values', []):
-            self._clone_bitbucket_repos(project)
+            self._clone_repos(project)
 
 
     def clone(self):
-        return self._clone_bitbucket_projects()
+        return self._clone_projects()
