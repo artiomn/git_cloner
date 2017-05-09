@@ -5,5 +5,6 @@ Need to clone repositories from Atlassian Bitbucket, several repositories from
 Github (by user) and other.
 
 Tool is under development.
-Private use only.
+
+[Look at the tool web-site for more information](http://artiomsoft.ru/programs_useful.html)
 
