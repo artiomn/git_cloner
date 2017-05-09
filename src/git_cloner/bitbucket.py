@@ -11,6 +11,10 @@ class BitbucketclonerException(Exception):
 
 
 class BitbucketCloner(object):
+    """
+    Class to clone Bitbucket repositories.
+    """
+
     def __init__(self, site, owner, login, password):
         self.login = login
         self.password = password

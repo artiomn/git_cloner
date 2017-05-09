@@ -21,6 +21,7 @@ if __name__ == '__main__':
     owner = args.owner[0]
 
     if service_type is None:
+        # Service provider type detection.
         if 'github' in site:
             service_type = 'github'
         elif 'bitbucket' in site or 'atlassian' in site:
