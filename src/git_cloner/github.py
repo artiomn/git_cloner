@@ -15,6 +15,10 @@ class GithubClonerException(Exception):
 
 
 class GithubCloner(object):
+    """
+    Class to clone Github-style repositories.
+    """
+
     def __init__(self, site, owner, login='', password=''):
         self.login = login
         self.password = password
@@ -56,7 +60,7 @@ class GithubCloner(object):
         return users
 
     def _clone_user_projects(self):
-        repos = self._download_path('/users/{}/repos'.format(self.owner))
+        repos = self._download_path('/users/{}/repos?per_page=100000'.format(self.owner))
 
         repos = json.loads(repos)
 
@@ -65,6 +69,8 @@ class GithubCloner(object):
 
         if not os.path.isdir(self.owner):
             os.mkdir(self.owner)
+
+        print('Repositories count: {}'.format(len(repos)))
 
         with open('{}/repos.json'.format(self.owner), 'w') as f:
             pprint(repos, stream=f)
